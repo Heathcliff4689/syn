@@ -7,15 +7,13 @@ class Arguements:
         # optimizer parameters
         self.n_epochs = 2**3
         self.n_iter = 2
-        self.batch_size = 2000
-        self.mini_batch_size = 20
+        self.n_memories = 2000
+        self.observe_batch_size = 20
+        self.batch_size = self.observe_batch_size
         self.lr = 1e-4  # resNet_t 1e-4 resNet_att 1e-3
 
         # general experiments parameters
         self.hidden_layers = '256-128-128-64-32'
-        self.n_memories = self.batch_size
-        self.step = 2
-        self.age = 0
         self.mode = 'online'
         self.noise = 1e-12
         self.user = 14

@@ -31,8 +31,9 @@ class DataProducer:
             for _ in range(args.n_epochs):
                 task_p = [[t, i] for i in range(N)]
                 random.shuffle(task_p)
+                task_p = task_p[:args.n_memories]
                 self.permutation += task_p
-            print("Task", t, "Samples are", N)
+            print("Task", t, "Samples are", args.n_memories)
 
         self.length = len(self.permutation)
         self.current = 0

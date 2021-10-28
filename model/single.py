@@ -20,7 +20,7 @@ class Net(torch.nn.Module):
         # setup optimizer
         self.opt = torch.optim.RMSprop(self.parameters(), lr=args.lr)
         self.n_iter = args.n_iter
-        self.mini_batch_size = args.mini_batch_size
+        self.mini_batch_size = args.observe_batch_size
 
         # setup losses
         self.noise = args.noise

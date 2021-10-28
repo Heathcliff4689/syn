@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from common import MLP, weighted_mse_loss, weighted_sumrate_loss, SumRateLoss
+from model.common import MLP, weighted_mse_loss, weighted_sumrate_loss, SumRateLoss
 import numpy as np
 import matplotlib.pyplot as plt
 from Paras import args
@@ -138,7 +138,7 @@ class Net(torch.nn.Module):
         # setup optimizer
         self.opt = torch.optim.Adam(self.parameters(), lr=args.lr)
         self.n_iter = args.n_iter
-        self.mini_batch_size = args.mini_batch_size
+        self.mini_batch_size = args.observe_batch_size
 
         # setup losses
         self.noise = args.noise

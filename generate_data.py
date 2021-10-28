@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> f52f41c5f4c600b8d1f2be0d9c41bb3dcee75ff1
 
 import argparse
 import torch

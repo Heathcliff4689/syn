@@ -6,7 +6,7 @@ from main import eval
 import seaborn as sns
 from generate_data import load_datasets
 from Paras import args
-from resNet_t import get_batch
+from model.resNet_t import get_batch
 
 
 
