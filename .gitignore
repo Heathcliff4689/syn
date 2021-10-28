@@ -6,4 +6,4 @@ venv
 *.png
 *.jpg
 *.txt
-results/
+results/*
