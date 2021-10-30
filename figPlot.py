@@ -58,6 +58,9 @@ if __name__ == '__main__':
     Model = importlib.import_module('model.' + args.model)
     model = Model.Net(n_inputs, n_outputs, n_tasks, args)
 
+    (result_t_mse, result_t_rate, result_t_ratio, result_a, spent_time, model_state_dict_res, args) \
+        = torch.load(path + '.pt')
+
     leg = ['target', 'predict']
 
     ratio = []
