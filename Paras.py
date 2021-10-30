@@ -7,7 +7,7 @@ class Arguements:
         # optimizer parameters
         self.n_epochs = 2**3
         self.n_iter = 2
-        self.n_memories = 2000
+        self.n_memories = 200
         self.observe_batch_size = 20
         self.batch_size = self.observe_batch_size
         self.lr = 1e-4  # resNet_t 1e-4 resNet_att 1e-3
@@ -27,7 +27,7 @@ class Arguements:
         # experiment parameters
         self.cuda = 'n'
         self.seed = 0
-        self.log_every = 1 if self.model[-4:] != 'ftrl' else 10
+        self.log_every = 1 if self.model[-4:] != 'ftrl' else 1
         self.save_path = 'results/'
 
         # data parameters

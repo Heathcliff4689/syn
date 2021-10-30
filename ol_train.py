@@ -160,31 +160,13 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         time_spent = time_spent + time_end - time_start
 
         if(((i % args.log_every) == 0) or (t != current_task)):
-
-            num_zeros = 0
-            total_params = 0
-            for m in model.modules():
-                if not isinstance(m, nn.Linear):
-                    continue
-                num_zeros += (
-                        m.weight.eq(0).sum().item() + m.bias.eq(0).sum().item()
-                )
-                total_params += m.weight.numel() + m.bias.numel()
-            sparsity = num_zeros / total_params if total_params != 0 else 0
-
-            result_spasity.append(sparsity)
-
-            plt.plot(result_spasity, '-', color='b', linewidth=0.5)
-            plt.draw()
-            plt.savefig('results/model_spasity.png')
-
             res_per_t_mse, res_per_t_rate, res_per_t_ratio, res_all = eval(
                 model, x_te, args)
-            result_t_mse.append(res_per_t_mse)
-            result_t_rate.append(res_per_t_rate)
-            result_t_ratio.append(res_per_t_ratio)
-            result_all.append(res_all)
             current_task = t
+            result_t_mse.append(res_per_t_mse[current_task])
+            result_t_rate.append(res_per_t_rate[current_task])
+            result_t_ratio.append(res_per_t_ratio[current_task])
+            result_all.append(res_all)
             time_all.append(time_spent)
 
     # torch.save(torch.Tensor(result_spasity), 'result_spasity.pt')
