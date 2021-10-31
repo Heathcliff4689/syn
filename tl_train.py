@@ -141,6 +141,8 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         if current_task < t and t-1 in args.train:
             print('save model ', t-1)
             torch.save(model.state_dict(), model.fname + '_' + str(t-1) + '_state_dict.pt')
+            if t-1 == args.train[-1]:
+                break
 
         # train
         if t in args.train:
