@@ -76,11 +76,12 @@ if __name__ == '__main__':
     ar = 0
     write = 1
 
-    for i in range(1, n_tasks + 1):
+    for i in args.train:
+        i = i + 1
         sns.set_theme(context='paper', style='ticks', font='Times New Roman',
                       font_scale=1.2,
                       )
-        model_state_dict = torch.load(path + '_' + str(i) + '_state_dict.pt')
+        model_state_dict = torch.load(path + '_' + str(i-1) + '_state_dict.pt')
         model.load_state_dict(model_state_dict)
         ratio_per_sample, MSE_per_sample, SUM_per_sample, LABEL_per_sample = test(model, x_te, args)
 

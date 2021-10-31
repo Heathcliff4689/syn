@@ -106,9 +106,7 @@ def train(model_o, dataProducer, x_te, args, joint=False):
     result_t_ratio = []
     time_all = []
     result_all = []  # avg performance on all test samples
-    result_spasity = []
     current_task = 0
-    time_start = time.time()
     time_spent = 0
     model = model_o
 
@@ -136,40 +134,34 @@ def train(model_o, dataProducer, x_te, args, joint=False):
             v_x[perm_index] = v_x_acc[perm_index]
             v_y[perm_index] = v_y_acc[perm_index]
 
-        if args.train is not None and t != args.train:
-            continue
-
         if args.cuda:
             v_x = v_x.cuda()
             v_y = v_y.cuda()
 
-        if args.train is None and current_task < t:
-            print('save model ', t)
-            torch.save(model.state_dict(), model.fname + '_' + str(t) + '_state_dict.pt')
+        if current_task < t and t-1 in args.train:
+            print('save model ', t-1)
+            torch.save(model.state_dict(), model.fname + '_' + str(t-1) + '_state_dict.pt')
 
-        time_start = time.time()
+        # train
+        if t in args.train:
+            time_start = time.time()
+            model.train()
+            if args.model[-4:] == 'ftrl':
+                model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr, opt=opt)
+            else:
+                model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
 
-        model.train()
+            time_end = time.time()
+            time_spent = time_spent + time_end - time_start
 
-        if args.model[-4:] == 'ftrl':
-            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr, opt=opt)
-        else:
-            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
-
-        time_end = time.time()
-        time_spent = time_spent + time_end - time_start
-
-        if(((i % args.log_every) == 0) or (t != current_task)):
-            res_per_t_mse, res_per_t_rate, res_per_t_ratio, res_all = eval(
-                model, x_te, args)
-            current_task = t
-            result_t_mse.append(res_per_t_mse[current_task])
-            result_t_rate.append(res_per_t_rate[current_task])
-            result_t_ratio.append(res_per_t_ratio[current_task])
-            result_all.append(res_all)
-            time_all.append(time_spent)
-
-    # torch.save(torch.Tensor(result_spasity), 'result_spasity.pt')
+            if (((i % args.log_every) == 0) or (t != current_task)):
+                res_per_t_mse, res_per_t_rate, res_per_t_ratio, res_all = eval(model, x_te, args)
+                current_task = t
+                result_t_mse.append(res_per_t_mse[current_task])
+                result_t_rate.append(res_per_t_rate[current_task])
+                result_t_ratio.append(res_per_t_ratio[current_task])
+                result_all.append(res_all)
+                time_all.append(time_spent)
 
     return torch.Tensor(result_t_mse), torch.Tensor(result_t_rate), torch.Tensor(result_t_ratio), torch.Tensor(result_all), time_all
 
@@ -226,12 +218,9 @@ if __name__ == "__main__":
     print('model para: ' + str(vars(args)))
     print('spent_time: ' + str(spent_time) + 's')
 
-    if args.train is not None and args.mode != 'joint':
-        print('save model ', args.train)
-        torch.save(model.state_dict(), model.fname + '_' + str(args.train) + '_state_dict.pt')
-    else:
-        print('save model ', len(x_tr))
-        torch.save(model.state_dict(), model.fname + '_' + str(len(x_tr)) + '_state_dict.pt')
+    if 4 in args.train and args.mode != 'joint':
+        print('save model ', 4)
+        torch.save(model.state_dict(), model.fname + '_' + str(4) + '_state_dict.pt')
     # save all results in binary file
     torch.save((result_t_mse, result_t_rate, result_t_ratio, result_a,
                 spent_time, model.state_dict(), args), model.fname + '.pt')
