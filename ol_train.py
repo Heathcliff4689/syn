@@ -23,6 +23,7 @@ class DataProducer:
         self.data = data
         self.batch_size = args.batch_size
         n_tasks = len(data)
+        tmpLen = args.step
 
         self.permutation = []
         for t in range(n_tasks):
@@ -30,9 +31,9 @@ class DataProducer:
             for _ in range(args.n_epochs):
                 task_p = [[t, i] for i in range(N)]
                 random.shuffle(task_p)
-                task_p = task_p[:args.n_memories]
+                task_p = task_p[:args.n_memories] if t == 0 else task_p[:tmpLen]
                 self.permutation += task_p
-            print("Task", t, "Samples are", args.n_memories)
+            print("Task", t, "Samples are", args.n_memories if t == 0 else tmpLen)
 
         random.shuffle(self.permutation)
         self.length = len(self.permutation)
@@ -84,7 +85,6 @@ def eval(model, tasks, args):
     total_pred += rate_loss
     total_label += rate_loss_of_wmmse
 
-    print(result_mse, result_rate, result_ratio, total_pred/total_label)
     return result_mse, result_rate, result_ratio, total_pred/total_label
 
 
@@ -124,6 +124,8 @@ def train(model_o, dataProducer, x_te, args, joint=False):
             res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0, res_all0 = eval(model, (v_x, v_y), args)
             res_per_t_mse1, res_per_t_rate1, res_per_t_ratio1, res_all1 = eval(model_un_train, (v_x, v_y), args)
 
+            print(res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0, res_all0)
+
             result_t_mse.append((res_per_t_mse0, res_per_t_mse1))
             result_t_rate.append((res_per_t_rate0, res_per_t_rate1))
             result_t_ratio.append((res_per_t_ratio0, res_per_t_ratio1))
@@ -162,8 +164,8 @@ if __name__ == "__main__":
     model.fname = os.path.join(args.save_path, model.fname)
 
     # load pretrain networks
-    model_state_dict = torch.load('data/resNet_t_online_mimo_5_0_state_dict.pt')
-    model.load_state_dict(model_state_dict)
+    # model_state_dict = torch.load('data/resNet_t_online_mimo_5_0_state_dict.pt')
+    # model.load_state_dict(model_state_dict)
 
     if args.cuda:
         model.cuda()
@@ -187,7 +189,7 @@ if __name__ == "__main__":
     # print stats
     print('model name: ' + model.fname)
     print('model para: ' + str(vars(args)))
-    print('spent_time: ' + str(spent_time) + 's')
+    print('spent_time: ' + str(spent_time[-1]) + 's')
 
     # save all results in binary file
     torch.save((result_t_mse, result_t_rate, result_t_ratio, result_a,

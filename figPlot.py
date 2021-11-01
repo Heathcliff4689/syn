@@ -62,7 +62,7 @@ if __name__ == '__main__':
         = torch.load(path + '.pt')
 
     if args.model[-4:] == 'ftrl':
-        plt.plot(result_t_ratio, '-', color='r', linewidth=0.5)
+        plt.plot(result_t_ratio[:, 0], '-', color='r', linewidth=0.5)
         plt.draw()
         plt.savefig('results/train_ratio.png')
 
