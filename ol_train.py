@@ -162,7 +162,7 @@ if __name__ == "__main__":
     model.fname = os.path.join(args.save_path, model.fname)
 
     # load pretrain networks
-    model_state_dict = torch.load('data/')
+    model_state_dict = torch.load('data/resNet_t_online_mimo_5_0_state_dict.pt')
     model.load_state_dict(model_state_dict)
 
     if args.cuda:
