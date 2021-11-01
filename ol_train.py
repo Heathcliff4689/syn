@@ -26,7 +26,7 @@ class DataProducer:
         tmpLen = args.step
 
         self.permutation = []
-        for t in range(n_tasks):
+        for t in args.train:
             N = data[t][1].size(0)
             for _ in range(args.n_epochs):
                 task_p = [[t, i] for i in range(N)]
@@ -35,7 +35,7 @@ class DataProducer:
                 self.permutation += task_p
             print("Task", t, "Samples are", args.n_memories if t == 0 else tmpLen)
 
-        random.shuffle(self.permutation)
+        # random.shuffle(self.permutation)
         self.length = len(self.permutation)
         self.current = 0
         print("total length", self.length)
@@ -124,7 +124,7 @@ def train(model_o, dataProducer, x_te, args, joint=False):
             res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0, res_all0 = eval(model, (v_x, v_y), args)
             res_per_t_mse1, res_per_t_rate1, res_per_t_ratio1, res_all1 = eval(model_un_train, (v_x, v_y), args)
 
-            print(res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0, res_all0)
+            print(res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0)
 
             result_t_mse.append((res_per_t_mse0, res_per_t_mse1))
             result_t_rate.append((res_per_t_rate0, res_per_t_rate1))
