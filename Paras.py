@@ -5,8 +5,8 @@ class Arguements:
         self.train = [0, 1]
 
         # optimizer parameters   total_step = n_epochs * n_memories / observe_batch_size
-        self.n_epochs = 2**4
-        self.n_iter = 2*2
+        self.n_epochs = 2**3
+        self.n_iter = 2
         self.n_memories = 2000 # [0, 20000]
         self.observe_batch_size = 20
         self.batch_size = self.observe_batch_size
