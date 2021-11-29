@@ -196,6 +196,10 @@ if __name__ == "__main__":
     model.fname = args.model + '_' + args.mode + args.file_ext
     model.fname = os.path.join(args.save_path, model.fname)
 
+    # model_path = args.save_path + args.model + '_' + args.mode + args.file_ext + '_4_state_dict.pt'
+    # model_state_dict = torch.load(model_path)
+    # model.load_state_dict(model_state_dict)
+
     if args.cuda:
         model.cuda()
 

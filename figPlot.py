@@ -49,7 +49,7 @@ def test(model, tasks, args):
 if __name__ == '__main__':
 
     print(str(vars(args)))
-    path = args.save_path + 'resNet_att_batch200_train1-5000_iter1600_lr1e-4/' + args.model + '_' + args.mode + args.file_ext
+    path = args.save_path + args.model + '_' + args.mode + args.file_ext
 
     # load data
     x_tr, x_te, n_inputs, n_outputs, n_tasks = load_datasets(args)
@@ -191,7 +191,7 @@ if __name__ == '__main__':
             rate.append(result_rate)
 
     if write:
-        f = open('results/records.txt', 'w+')
+        f = open('results/tl4-1resNet_att_batch200_train1-5000_iter1600_lr3e-4/records.txt', 'w+')
         f.write(str(vars(args)))
         f.write('\n')
 
