@@ -215,13 +215,15 @@ class Net(torch.nn.Module):
 
                 self.x = self.x + 1
                 if 1:  # ptloss.detach().numpy() < 0.18:
-                    plt.clf()
+
                     self.ax.append(self.x)
                     self.ay.append(ptloss.cpu().detach().numpy())
 
+            plt.clf()
             plt.plot(self.ax, self.ay, '-', color='r', linewidth=0.5)
             plt.draw()
             plt.savefig('results/train_loss.png')
+            torch.save((self.x, self.y), self.fname + '_loss.pt')
 
 
 
