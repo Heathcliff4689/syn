@@ -223,7 +223,7 @@ class Net(torch.nn.Module):
             plt.plot(self.ax, self.ay, '-', color='r', linewidth=0.5)
             plt.draw()
             plt.savefig('results/train_loss.png')
-            torch.save((self.x, self.y), self.fname + '_loss.pt')
+            torch.save((self.ax, self.ay), self.fname + '_loss.pt')
 
 
 
