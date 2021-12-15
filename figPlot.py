@@ -61,10 +61,10 @@ if __name__ == '__main__':
     (result_t_mse, result_t_rate, result_t_ratio, result_a, spent_time, model_state_dict_res, args) \
         = torch.load(path + '.pt')
 
-    if args.model[-4:] == 'ftrl':
-        plt.plot(result_t_ratio, '-', color='r', linewidth=0.5)
-        plt.draw()
-        plt.savefig('results/train_ratio.png')
+
+    plt.plot(result_t_ratio[:, 0], '-', color='r', linewidth=0.5)
+    plt.draw()
+    plt.savefig('results/train_ratio.png')
 
     leg = ['target', 'predict']
 

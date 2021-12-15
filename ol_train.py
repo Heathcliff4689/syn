@@ -11,8 +11,7 @@ from model.common import SumRateLoss
 from Paras import args
 import matplotlib.pyplot as plt
 from ftrl import ftrl
-
-from model.resNet_t import get_batch
+from copy import deepcopy as cp
 
 class DataProducer:
     def __init__(self, data, args):
@@ -24,17 +23,19 @@ class DataProducer:
         self.data = data
         self.batch_size = args.batch_size
         n_tasks = len(data)
+        tmpLen = args.step
 
         self.permutation = []
-        for t in range(n_tasks):
+        for t in args.train:
             N = data[t][1].size(0)
             for _ in range(args.n_epochs):
                 task_p = [[t, i] for i in range(N)]
                 random.shuffle(task_p)
-                task_p = task_p[:args.n_memories]
+                task_p = task_p[:args.n_memories] if t == 0 else task_p[:tmpLen]
                 self.permutation += task_p
-            print("Task", t, "Samples are", args.n_memories)
+            print("Task", t, "Samples are", args.n_memories if t == 0 else tmpLen)
 
+        # random.shuffle(self.permutation)
         self.length = len(self.permutation)
         self.current = 0
         print("total length", self.length)
@@ -53,13 +54,12 @@ class DataProducer:
             j = []  # selected samples index
             i = 0
             while (((self.current + i) < self.length) and
-                   (self.permutation[self.current + i][0] == ti) and
                    (i < self.batch_size)):
                 j.append(self.permutation[self.current + i][1])
                 i += 1
             self.current += i
             j = torch.LongTensor(j)
-            return self.data[ti][1][j], ti, self.data[ti][2][j]
+            return self.data[ti][1][j], -1, self.data[ti][2][j]
 
 
 def eval(model, tasks, args):
@@ -67,36 +67,24 @@ def eval(model, tasks, args):
     evaluates the model on all tasks
     """
     model.eval()
-    result_mse = []
-    result_rate = []
-    result_ratio = []
     MSEloss = torch.nn.MSELoss()
 
     total_pred = 0
     total_label = 0
-    for i, task in enumerate(tasks):
-        t = i
-        xb = task[1]
-        yb = task[2]
 
-        if args.model == 'resNet_t':
-            xb, _ = get_batch(xb, yb)
-        # if args.cuda:
-        #     xb = xb.cuda()
-        output = model(xb, t).data.cpu()
-        # output = (output > 0.5).float()
+    xb = tasks[0]
+    yb = tasks[1]
 
-        rate_loss = -SumRateLoss(xb.cpu(), output, args.noise).item()
-        rate_loss_of_wmmse = - \
-            SumRateLoss(xb.cpu(), yb.cpu(), args.noise).item()
-        result_rate.append(rate_loss)
-        result_ratio.append(rate_loss / rate_loss_of_wmmse)
-        result_mse.append(MSEloss(output, yb.cpu()).item())
-        total_pred += rate_loss
-        total_label += rate_loss_of_wmmse
+    output = model(xb, 0).data.cpu()
 
-    # print('MSE:', [i for i in result_mse])
-    print('ratio:', [i for i in result_ratio])
+    rate_loss = -SumRateLoss(xb.cpu(), output, args.noise).item()
+    rate_loss_of_wmmse = -SumRateLoss(xb.cpu(), yb.cpu(), args.noise).item()
+    result_rate = rate_loss
+    result_ratio = rate_loss / rate_loss_of_wmmse
+    result_mse = MSEloss(output, yb.cpu()).item()
+    total_pred += rate_loss
+    total_label += rate_loss_of_wmmse
+
     return result_mse, result_rate, result_ratio, total_pred/total_label
 
 
@@ -106,9 +94,9 @@ def train(model_o, dataProducer, x_te, args, joint=False):
     result_t_ratio = []
     time_all = []
     result_all = []  # avg performance on all test samples
-    current_task = 0
     time_spent = 0
     model = model_o
+    model_un_train = cp(model_o)
 
     if args.model[-4:] == 'ftrl':
         opt = ftrl.FTRL(model.parameters(),
@@ -118,50 +106,31 @@ def train(model_o, dataProducer, x_te, args, joint=False):
                         l2=args.ftrl_l2)
 
     for (i, (v_x, t, v_y)) in enumerate(dataProducer):
-        if joint:  # joint dataset train
-            if i == 0:
-                v_x_acc = v_x
-                v_y_acc = v_y
-            else:
-                v_x_acc = torch.cat((v_x_acc, v_x), 0)
-                v_y_acc = torch.cat((v_y_acc, v_y), 0)
-
-            perm_index = torch.randperm(v_x_acc.size(0))
-            v_x_acc = v_x_acc[perm_index]
-            v_y_acc = v_y_acc[perm_index]
-
-            perm_index = torch.randperm(int(args.batch_size/args.step))
-            v_x[perm_index] = v_x_acc[perm_index]
-            v_y[perm_index] = v_y_acc[perm_index]
-
         if args.cuda:
             v_x = v_x.cuda()
             v_y = v_y.cuda()
 
-        if current_task < t and t-1 in args.train:
-            print('save model ', t-1)
-            torch.save(model.state_dict(), model.fname + '_' + str(t-1) + '_state_dict.pt')
+        time_start = time.time()
+        model.train()
+        if args.model[-4:] == 'ftrl':
+            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr, opt=opt)
+        else:
+            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
 
-        # train
-        if t in args.train:
-            time_start = time.time()
-            model.train()
-            if args.model[-4:] == 'ftrl':
-                model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr, opt=opt)
-            else:
-                model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
+        time_end = time.time()
+        time_spent = time_spent + time_end - time_start
 
-            time_end = time.time()
-            time_spent = time_spent + time_end - time_start
+        if (i % args.log_every) == 0:
+            res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0, res_all0 = eval(model, (v_x, v_y), args)
+            res_per_t_mse1, res_per_t_rate1, res_per_t_ratio1, res_all1 = eval(model_un_train, (v_x, v_y), args)
 
-            if (((i % args.log_every) == 0) or (t != current_task)):
-                res_per_t_mse, res_per_t_rate, res_per_t_ratio, res_all = eval(model, x_te, args)
-                current_task = t
-                result_t_mse.append(res_per_t_mse[current_task])
-                result_t_rate.append(res_per_t_rate[current_task])
-                result_t_ratio.append(res_per_t_ratio[current_task])
-                result_all.append(res_all)
-                time_all.append(time_spent)
+            print(res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0)
+
+            result_t_mse.append((res_per_t_mse0, res_per_t_mse1))
+            result_t_rate.append((res_per_t_rate0, res_per_t_rate1))
+            result_t_ratio.append((res_per_t_ratio0, res_per_t_ratio1))
+            result_all.append((res_all0, res_all1))
+            time_all.append(time_spent)
 
     return torch.Tensor(result_t_mse), torch.Tensor(result_t_rate), torch.Tensor(result_t_ratio), torch.Tensor(result_all), time_all
 
@@ -194,6 +163,10 @@ if __name__ == "__main__":
     model.fname = args.model + '_' + args.mode + args.file_ext
     model.fname = os.path.join(args.save_path, model.fname)
 
+    # load pretrain networks
+    # model_state_dict = torch.load('data/resNet_t_online_mimo_5_0_state_dict.pt')
+    # model.load_state_dict(model_state_dict)
+
     if args.cuda:
         model.cuda()
 
@@ -216,11 +189,8 @@ if __name__ == "__main__":
     # print stats
     print('model name: ' + model.fname)
     print('model para: ' + str(vars(args)))
-    print('spent_time: ' + str(spent_time) + 's')
+    print('spent_time: ' + str(spent_time[-1]) + 's')
 
-    if 4 in args.train and args.mode != 'joint':
-        print('save model ', 4)
-        torch.save(model.state_dict(), model.fname + '_' + str(4) + '_state_dict.pt')
     # save all results in binary file
     torch.save((result_t_mse, result_t_rate, result_t_ratio, result_a,
                 spent_time, model.state_dict(), args), model.fname + '.pt')

@@ -110,12 +110,6 @@ def train(model_o, dataProducer, x_te, args, joint=False):
     time_spent = 0
     model = model_o
 
-    if args.model[-4:] == 'ftrl':
-        opt = ftrl.FTRL(model.parameters(),
-                        alpha=args.ftrl_alpha,
-                        beta=args.ftrl_beta,
-                        l1=args.ftrl_l1,
-                        l2=args.ftrl_l2)
 
     for (i, (v_x, t, v_y)) in enumerate(dataProducer):
         if joint:  # joint dataset train
@@ -148,10 +142,8 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         if t in args.train:
             time_start = time.time()
             model.train()
-            if args.model[-4:] == 'ftrl':
-                model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr, opt=opt)
-            else:
-                model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
+
+            model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr)
 
             time_end = time.time()
             time_spent = time_spent + time_end - time_start
