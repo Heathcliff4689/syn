@@ -2,15 +2,15 @@ class Arguements:
     def __init__(self):
         # model parameters
         self.model = 'resNet_t_ftrl'
-        self.train = [0, 1]
+        self.train = [1]
 
         # optimizer parameters   total_step = n_epochs * n_memories / observe_batch_size
         self.n_epochs = 2**4
-        self.n_iter = 2*2
-        self.n_memories = 2000  # [0, 20000]
+        self.n_iter = 2
+        self.n_memories = 5000  # [0, 20000]
         self.observe_batch_size = 200
         self.batch_size = self.observe_batch_size
-        self.step = 2000  # others number n_memories / step
+        self.step = 5000  # others number n_memories / step
         self.lr = 1e-3  # resNet_t 1e-4 resNet_att 1e-3
 
         # general experiments parameters
@@ -20,7 +20,7 @@ class Arguements:
         self.user = 14
 
         # ftrl
-        self.ftrl_alpha = 1.0
+        self.ftrl_alpha = 1e-3
         self.ftrl_beta = 1.0
         self.ftrl_l1 = 1.0
         self.ftrl_l2 = 1.0

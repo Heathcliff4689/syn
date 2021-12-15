@@ -67,24 +67,36 @@ def eval(model, tasks, args):
     evaluates the model on all tasks
     """
     model.eval()
+    result_mse = []
+    result_rate = []
+    result_ratio = []
     MSEloss = torch.nn.MSELoss()
 
     total_pred = 0
     total_label = 0
+    for i, task in enumerate(tasks):
+        t = i
+        xb = task[1]
+        yb = task[2]
 
-    xb = tasks[0]
-    yb = tasks[1]
+        if args.model == 'resNet_t':
+            xb, _ = get_batch(xb, yb)
+        # if args.cuda:
+        #     xb = xb.cuda()
+        output = model(xb, t).data.cpu()
+        # output = (output > 0.5).float()
 
-    output = model(xb, 0).data.cpu()
+        rate_loss = -SumRateLoss(xb.cpu(), output, args.noise).item()
+        rate_loss_of_wmmse = - \
+            SumRateLoss(xb.cpu(), yb.cpu(), args.noise).item()
+        result_rate.append(rate_loss)
+        result_ratio.append(rate_loss / rate_loss_of_wmmse)
+        result_mse.append(MSEloss(output, yb.cpu()).item())
+        total_pred += rate_loss
+        total_label += rate_loss_of_wmmse
 
-    rate_loss = -SumRateLoss(xb.cpu(), output, args.noise).item()
-    rate_loss_of_wmmse = -SumRateLoss(xb.cpu(), yb.cpu(), args.noise).item()
-    result_rate = rate_loss
-    result_ratio = rate_loss / rate_loss_of_wmmse
-    result_mse = MSEloss(output, yb.cpu()).item()
-    total_pred += rate_loss
-    total_label += rate_loss_of_wmmse
-
+    # print('MSE:', [i for i in result_mse])
+    print('ratio:', [i for i in result_ratio])
     return result_mse, result_rate, result_ratio, total_pred/total_label
 
 
@@ -113,23 +125,20 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         time_start = time.time()
         model.train()
         if args.model[-4:] == 'ftrl':
-            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr, opt=opt)
+            model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr, opt=opt)
         else:
-            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
+            model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr)
 
         time_end = time.time()
         time_spent = time_spent + time_end - time_start
 
-        if (i % args.log_every) == 0:
-            res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0, res_all0 = eval(model, (v_x, v_y), args)
-            res_per_t_mse1, res_per_t_rate1, res_per_t_ratio1, res_all1 = eval(model_un_train, (v_x, v_y), args)
-
-            print(res_per_t_mse0, res_per_t_rate0, res_per_t_ratio0)
-
-            result_t_mse.append((res_per_t_mse0, res_per_t_mse1))
-            result_t_rate.append((res_per_t_rate0, res_per_t_rate1))
-            result_t_ratio.append((res_per_t_ratio0, res_per_t_ratio1))
-            result_all.append((res_all0, res_all1))
+        if (((i % args.log_every) == 0) or (t != current_task)):
+            res_per_t_mse, res_per_t_rate, res_per_t_ratio, res_all = eval(model, x_te, args)
+            current_task = t
+            result_t_mse.append(res_per_t_mse[current_task])
+            result_t_rate.append(res_per_t_rate[current_task])
+            result_t_ratio.append(res_per_t_ratio[current_task])
+            result_all.append(res_all)
             time_all.append(time_spent)
 
     return torch.Tensor(result_t_mse), torch.Tensor(result_t_rate), torch.Tensor(result_t_ratio), torch.Tensor(result_all), time_all
