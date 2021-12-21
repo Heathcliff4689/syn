@@ -79,8 +79,6 @@ def eval(model, tasks, args):
         xb = task[1]
         yb = task[2]
 
-        if args.model == 'resNet_t':
-            xb, _ = get_batch(xb, yb)
         # if args.cuda:
         #     xb = xb.cuda()
         output = model(xb, t).data.cpu()

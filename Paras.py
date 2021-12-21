@@ -1,7 +1,7 @@
 class Arguements:
     def __init__(self):
         # model parameters
-        self.model = 'resNet_t_ftrl'
+        self.model = 'resNet_att_ftrl'
         self.train = [1]
 
         # optimizer parameters   total_step = n_epochs * n_memories / observe_batch_size
@@ -11,7 +11,7 @@ class Arguements:
         self.observe_batch_size = 200
         self.batch_size = self.observe_batch_size
         self.step = 5000  # others number n_memories / step
-        self.lr = 1e-3  # resNet_t 1e-4 resNet_att 1e-3
+        self.lr = 1e-4  # resNet_t 1e-4 resNet_att 1e-3
 
         # general experiments parameters
         self.hidden_layers = '256-128-128-64-32'
@@ -20,10 +20,10 @@ class Arguements:
         self.user = 14
 
         # ftrl
-        self.ftrl_alpha = 1e-3
+        self.ftrl_alpha = 1e-2
         self.ftrl_beta = 1.0
-        self.ftrl_l1 = 1.0
-        self.ftrl_l2 = 1.0
+        self.ftrl_l1 = 0
+        self.ftrl_l2 = 1e-2
 
         # experiment parameters
         self.cuda = 'n'
