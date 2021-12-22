@@ -125,7 +125,7 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         if args.model[-4:] == 'ftrl':
             model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr, opt=opt)
         else:
-            model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr)
+            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
 
         time_end = time.time()
         time_spent = time_spent + time_end - time_start
@@ -133,9 +133,9 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         if (((i % args.log_every) == 0) or (t != current_task)):
             res_per_t_mse, res_per_t_rate, res_per_t_ratio, res_all = eval(model, x_te, args)
             current_task = t
-            result_t_mse.append(res_per_t_mse[current_task])
-            result_t_rate.append(res_per_t_rate[current_task])
-            result_t_ratio.append(res_per_t_ratio[current_task])
+            result_t_mse.append(res_per_t_mse)
+            result_t_rate.append(res_per_t_rate)
+            result_t_ratio.append(res_per_t_ratio)
             result_all.append(res_all)
             time_all.append(time_spent)
 

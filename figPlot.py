@@ -58,15 +58,15 @@ if __name__ == '__main__':
     Model = importlib.import_module('model.' + args.model)
     model = Model.Net(n_inputs, n_outputs, n_tasks, args)
 
-    (result_t_mse, result_t_rate, result_t_ratio, result_a, spent_time, model_state_dict_res, args) \
-        = torch.load(path + '.pt')
+    # (result_t_mse, result_t_rate, result_t_ratio, result_a, spent_time, model_state_dict_res, args) \
+    #     = torch.load(path + '.pt')
+    #
+    #
+    # plt.plot(result_t_ratio[:, 0], '-', color='r', linewidth=0.5)
+    # plt.draw()
+    # plt.savefig('results/train_ratio.png')
 
-
-    plt.plot(result_t_ratio[:, 0], '-', color='r', linewidth=0.5)
-    plt.draw()
-    plt.savefig('results/train_ratio.png')
-
-    leg = ['target', 'predict']
+    leg = ['WMMSE', 'DL']
 
     ratio = []
     rate = []
@@ -81,8 +81,8 @@ if __name__ == '__main__':
         sns.set_theme(context='paper', style='ticks', font='Times New Roman',
                       font_scale=1.2,
                       )
-        model_state_dict = torch.load(path + '_' + str(i-1) + '_state_dict.pt')
-        model.load_state_dict(model_state_dict)
+        model_state_dict = torch.load(path + '.pt')
+        model.load_state_dict(model_state_dict[5])
         ratio_per_sample, MSE_per_sample, SUM_per_sample, LABEL_per_sample = test(model, x_te, args)
 
         fig, axs = plt.subplots(nrows=1, ncols=5, sharex=True,
@@ -93,6 +93,7 @@ if __name__ == '__main__':
         name = ''
         bis = 'auto'
         ls = ['-.', ':', '--', '-', 'solid', 'dashed']
+        x = ['A', 'B', 'C', 'D', 'E']
         for t in range(n_tasks):
             if case == 0:
                 sns.histplot(LABEL_per_sample[t * 1000: t * 1000 + 1000], stat='count', bins=bis, ax=axs[t],
@@ -102,7 +103,7 @@ if __name__ == '__main__':
                              color='g', element='poly'
                              )
 
-                axs[t].set_xlabel('Sum-rate(bps/hz) in ' + 'Scenarios ' + str(t + 1))
+                axs[t].set_xlabel('Sum-rate(bps/hz) in ' + 'Scenario ' + x[t])
                 name = 'rate_pdf'
             elif case == 1:
                 sns.histplot(MSE_per_sample[t * 1000: t * 1000 + 1000], stat='count', bins=bis, ax=axs[t],
@@ -120,12 +121,12 @@ if __name__ == '__main__':
                 name = 'ratio_pdf'
 
         if args.mode != 'joint':
-            axs[i - 1].set_title('Selected Model ' + str(i), color='DarkRed')
+            axs[i - 1].set_title('Selected Scenario C', color='DarkRed')
         else:
             axs[2].set_title('Joint training model ', color='DarkRed')
         plt.legend(leg, loc='upper right', prop={'size': 15})
         plt.tight_layout()
-        plt.savefig('results/' + name + args.file_ext + '_model' + '_' + str(i) + '.png',
+        plt.savefig('results/' + name + args.file_ext + '_model' + '_' + str(i) + '.svg',
                     facecolor='w', edgecolor='w', transparent=True)  # .svg
 
         if cdf:
