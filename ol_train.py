@@ -125,7 +125,7 @@ def train(model_o, dataProducer, x_te, args, joint=False):
         if args.model[-4:] == 'ftrl':
             model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr, opt=opt)
         else:
-            model.observe(v_x, t, v_y, loss_type='MSE', x_te=x_te, x_tr=x_tr)
+            model.observe(v_x, t, v_y, loss_type='-MSE', x_te=x_te, x_tr=x_tr)
 
         time_end = time.time()
         time_spent = time_spent + time_end - time_start

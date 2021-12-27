@@ -25,7 +25,7 @@ if __name__ == '__main__':
     figa, axsa = plt.subplots(nrows=1, ncols=1, sharex=True,
                               sharey=True, figsize=(8, 5.1))
 
-    p1 = 'results/resNet_t_ftrl_online_mimo_5.pt'
+    p1 = 'results/resNet_att_ftrl_online_mimo_5.pt'
     # p31 = 'results/resNet_t_ftrl_online_mimo_5.pt'
     # p41 = 'results/resNet_att_ftrl_online_mimo_5.pt'
 
