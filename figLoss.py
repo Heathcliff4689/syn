@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     plt.show()
 
-    axsa.plot(d1[0], d1[1], marker='o', markersize=5, markevery=60)
+    axsa.plot(d1[0], d1[1], marker='o', markersize=5, markevery=60, color='g')
     axsa.plot(d31[0], d31[1], marker='v', markersize=5, markevery=60)
     # axsa.plot(d41[0], d41[1], marker='d', markersize=5, markevery=60)
 
