@@ -38,8 +38,8 @@ if __name__ == '__main__':
 
 
     plt.legend(leg, loc='upper right', prop={'size': 10})
-    axsa.set_ylabel('loss')
-    axsa.set_xlabel('iterations')
+    axsa.set_ylabel('函数值')
+    axsa.set_xlabel('训练迭代次数/次')
     plt.tight_layout()
     # plt.show()
     plt.savefig('results/train_loss_3.svg')

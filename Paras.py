@@ -2,7 +2,7 @@ class Arguements:
     def __init__(self):
         # model parameters
 
-        self.model = 'resNet_t'
+        self.model = 'resNet_att'
         self.train = [1]
 
         # optimizer parameters   total_step = n_epochs * n_memories / observe_batch_size
