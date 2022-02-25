@@ -48,12 +48,12 @@ if __name__ == '__main__':
     # plt.show()
 
     # plt.legend(loc='upper right', prop={'size': 10})
-    axsa.set_ylabel('the Ratio of DL/WMMSE')
-    axsb.set_ylabel('the average rate loss')
-    axsa.set_xlabel('iterations')
+    axsa.set_ylabel('谱效比值（DL/WMMSE）')
+    axsb.set_ylabel('损失函数值')
+    axsa.set_xlabel('训练迭代次数/次')
 
     # plt.tight_layout()
-    plt.savefig('results/train_loss_3.svg')
+    plt.savefig('results/train_loss&ratio.svg')
     pass
 
 
