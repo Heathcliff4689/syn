@@ -1,8 +1,8 @@
 class Arguements:
     def __init__(self):
         # model parameters
-        self.model = 'resNet_att_ftrl'
-        self.train = [1]
+        self.model = 'resNet_att'
+        self.train = [2]
 
         # optimizer parameters   total_step = n_epochs * n_memories / observe_batch_size
         self.n_epochs = 2**4

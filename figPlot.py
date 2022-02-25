@@ -1,5 +1,6 @@
 import torch
 import importlib
+import matplotlib
 from model import common
 import matplotlib.pyplot as plt
 from main import eval
@@ -74,21 +75,25 @@ if __name__ == '__main__':
     case = 0
     cdf = 0
     ar = 0
-    write = 1
+    write = 0
 
     for i in args.train:
         i = i + 1
-        sns.set_theme(context='paper', style='ticks', font='Times New Roman',
-                      font_scale=1.2,
-                      )
-        model_state_dict = torch.load(path + '.pt')
-        model.load_state_dict(model_state_dict[5])
+
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        # sns.set_theme(context='paper', style='ticks', font='Times New Roman',
+        #               font_scale=1.2,
+        #               )
+        model_state_dict = torch.load(path + '_2_state_dict.pt')
+        # model.load_state_dict(model_state_dict[3])
+        model.load_state_dict(model_state_dict)
         ratio_per_sample, MSE_per_sample, SUM_per_sample, LABEL_per_sample = test(model, x_te, args)
 
         fig, axs = plt.subplots(nrows=1, ncols=5, sharex=True,
                                 sharey=True, figsize=(25, 5))
 
-        axs[0].set_ylabel('Counts of Samples')
+        axs[0].set_ylabel('用户数', fontsize=24)
 
         name = ''
         bis = 'auto'
@@ -100,10 +105,11 @@ if __name__ == '__main__':
                              element='poly'
                              )
                 sns.histplot(SUM_per_sample[t * 1000: t * 1000 + 1000], stat='count', bins=bis, ax=axs[t],
-                             color='g', element='poly'
+                             color='seagreen', element='poly'
                              )
 
-                axs[t].set_xlabel('Sum-rate(bps/hz) in ' + 'Scenario ' + x[t])
+
+                axs[t].set_xlabel('频谱效率(bps/hz) '  , fontsize=24)
                 name = 'rate_pdf'
             elif case == 1:
                 sns.histplot(MSE_per_sample[t * 1000: t * 1000 + 1000], stat='count', bins=bis, ax=axs[t],
@@ -121,7 +127,11 @@ if __name__ == '__main__':
                 name = 'ratio_pdf'
 
         if args.mode != 'joint':
-            axs[i - 1].set_title('Selected Scenario C', color='DarkRed')
+            axs[i - 3].set_title('训练集为C，测试集为A', fontsize=24)
+            axs[i - 2].set_title('训练集为C，测试集为B', fontsize=24)
+            axs[i - 1].set_title('训练集为C，测试集为C', color='DarkRed', fontsize=24)
+            axs[i].set_title('训练集为C，测试集为D', fontsize=24)
+            axs[i + 1].set_title('训练集为C，测试集为E', fontsize=24)
         else:
             axs[2].set_title('Joint training model ', color='DarkRed')
         plt.legend(leg, loc='upper right', prop={'size': 15})

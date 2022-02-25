@@ -1,6 +1,6 @@
 import numpy
 import torch
-import importlib
+import matplotlib
 from model import common
 import matplotlib.pyplot as plt
 from main import eval
@@ -15,11 +15,14 @@ if __name__ == '__main__':
     print(str(vars(args)))
     path = args.save_path + args.model + '_' + args.mode + args.file_ext
 
-    leg = ['Scenario A', 'Scenario B', 'Scenario C', 'Scenario D', 'Scenario E']
+    leg = ['区域 A', '区域 B', '区域 C', '区域 D', '区域 E']
     ls = ['-.', '--', '-', 'solid', 'dashed']
-    sns.set_theme(context='paper', style='ticks', font='Times New Roman',
-                  font_scale=1
-                  )
+
+    matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+    matplotlib.rcParams['axes.unicode_minus'] = False
+    # sns.set_theme(context='paper', style='ticks', font='Times New Roman',
+    #               font_scale=1
+    #               )
 
 
     figa, axsa = plt.subplots(nrows=1, ncols=1, sharex=True,
@@ -48,11 +51,11 @@ if __name__ == '__main__':
 
 
     plt.legend(leg, loc='lower right', prop={'size': 10})
-    axsa.set_ylabel('the Ratio of DL/WMMSE')
-    axsa.set_xlabel('iterations')
+    axsa.set_ylabel('谱效比值（DL/WMMSE）')
+    axsa.set_xlabel('训练迭代次数/次')
     plt.tight_layout()
     # plt.show()
-    plt.savefig('results/train_ratio_5_A.svg')
+    plt.savefig('results/train_ratio_5_B.svg')
     pass
 
 

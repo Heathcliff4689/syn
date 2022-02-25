@@ -1,6 +1,6 @@
 import numpy
 import torch
-import importlib
+import matplotlib
 from model import common
 import matplotlib.pyplot as plt
 from main import eval
@@ -17,9 +17,12 @@ if __name__ == '__main__':
 
     leg = ['loss', 'rate']
     ls = ['-.', '--', '-', 'solid', 'dashed']
-    sns.set_theme(context='paper', style='ticks', font='Times New Roman',
-                  font_scale=1
-                  )
+
+    matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+    matplotlib.rcParams['axes.unicode_minus'] = False
+    # sns.set_theme(context='paper', style='ticks', font='Times New Roman',
+    #               font_scale=1
+    #               )
 
 
     figa, axsa = plt.subplots(nrows=1, ncols=1, sharex=True,
@@ -41,7 +44,7 @@ if __name__ == '__main__':
     # plt.show()
 
     axsb = axsa.twinx()
-    axsb.plot(d1[0], d1[1], marker='d', markersize=7, label='loss', markevery=60)
+    axsb.plot(d1[0], d1[1], marker='d', markersize=7, label='loss ', markevery=60)
     plt.legend(loc=7, prop={'size': 10})
     # plt.show()
     # axsa.plot(x, d31[2][:, 1], marker='s', markersize=5, markevery=60)
