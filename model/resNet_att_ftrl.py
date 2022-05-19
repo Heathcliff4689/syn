@@ -174,7 +174,10 @@ class Net(torch.nn.Module):
         self.loss_wmse = weighted_mse_loss
         self.loss_wsumrate = weighted_sumrate_loss
 
-        self.x = 0
+        # expectation of loss
+        self.M = 0.0
+
+        self.x = 1
         self.ax = []
         self.ay = []
 
@@ -212,7 +215,9 @@ class Net(torch.nn.Module):
                 if loss_type == 'MSE':
                     ptloss = loss(out, mini_batch_y)
                 else:
-                    ptloss = loss(mini_batch_x, out, args.noise)
+                    ptloss = self.M + (loss(mini_batch_x, out, args.noise) - self.M) / self.x
+                    self.M = ptloss.item()
+
                 ptloss.backward()
                 self.opt.step()
 
